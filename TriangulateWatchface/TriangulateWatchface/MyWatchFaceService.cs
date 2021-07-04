@@ -40,30 +40,35 @@ namespace TriangulateWatchface {
 
 				textPaint = new Paint {
 					Color = Color.Orange,
-					TextSize = 18f
+					TextSize = 18f,
+					AntiAlias = true
 				};
 
 
 				secondsHandPaint = new Paint {
 					Color = Color.Bisque,
-					StrokeWidth = 3f
+					StrokeWidth = 3f,
+					AntiAlias = true
 				};
 
 				minutesHandPaint = new Paint {
 					Color = Color.Azure,
-					StrokeWidth = 3f
+					StrokeWidth = 3f,
+					AntiAlias = true
 				};
 
 				hoursHandPaint = new Paint {
 					Color = Color.BlanchedAlmond,
-					StrokeWidth = 3f
+					StrokeWidth = 3f,
+					AntiAlias = true
 				};
 
 
 				secondsTrianglePaint = new Paint {
 					Color = Color.Green,
 					StrokeWidth = 1f,
-					Alpha = 125
+					Alpha = 125,
+					AntiAlias = true
 
 				};
 				secondsTrianglePaint.SetStyle(Paint.Style.FillAndStroke);
@@ -72,16 +77,19 @@ namespace TriangulateWatchface {
 				minutesTrianglePaint = new Paint {
 					Color = Color.Blue,
 					StrokeWidth = 1f,
-					Alpha = 125
+					Alpha = 125,
+					AntiAlias = true
 
 				};
+				minutesTrianglePaint.SetStyle(Paint.Style.FillAndStroke);
 
 				hoursTrianglePaint = new Paint {
 					Color = Color.Red,
 					StrokeWidth = 1f,
-					Alpha = 125
-
+					Alpha = 125,
+					AntiAlias = true
 				};
+				hoursTrianglePaint.SetStyle(Paint.Style.FillAndStroke);
 
 				dotPaint = new Paint {
 					Color = Color.White,
@@ -145,6 +153,7 @@ namespace TriangulateWatchface {
 				path.Close();
 				canvas.DrawPath(path, hoursTrianglePaint);
 
+				// IDEA: triangle to touch location
 
 				canvas.DrawLine(centerX, centerY, secondsX, secondsY, secondsHandPaint);
 				canvas.DrawLine(centerX, centerY, minutesX, minutesY, minutesHandPaint);
@@ -152,27 +161,48 @@ namespace TriangulateWatchface {
 
 				canvas.DrawCircle(centerX, centerY, 3f, dotPaint);
 
-				var str = DateTime.Now.ToString("h:mm tt ss");
-				canvas.DrawText(str,
-					//(float)(frame.Left + 70),
-					centerX - 100,
-					//(float)(frame.Top + 80), 
-					centerY,
+				//var str = DateTime.Now.ToString("h:mm tt ss");
+				//canvas.DrawText(str,
+				//	//(float)(frame.Left + 70),
+				//	centerX - 100,
+				//	//(float)(frame.Top + 80), 
+				//	centerY,
+				//	textPaint
+				//);
+
+				//canvas.DrawText($"sa: {secondsAngle.ToString("0.00")}, {secondsX.ToString("0.00")} {secondsY.ToString("0.00")}",
+				//	//(float)(frame.Left + 70),
+				//	30,
+				//	//(float)(frame.Top + 80), 
+				//	centerY + 50,
+				//	textPaint
+				//);
+
+				// TODO: better hand texts positioning
+				// TODO: circles around hand texts
+
+				canvas.DrawText($"{DateTime.Now.Hour}h",
+					hoursX,
+					hoursY,
 					textPaint
 				);
 
-				canvas.DrawText($"sa: {secondsAngle.ToString("0.00")}, {secondsX.ToString("0.00")} {secondsY.ToString("0.00")}",
-					//(float)(frame.Left + 70),
-					30,
-					//(float)(frame.Top + 80), 
-					centerY + 50,
+				canvas.DrawText($"{DateTime.Now.Minute}m",
+					minutesX,
+					minutesY,
 					textPaint
 				);
 
+				canvas.DrawText($"{DateTime.Now.Second}s",
+					secondsX,
+					secondsY,
+					textPaint
+				);
 
 			}
 
 			public override void OnTimeTick() {
+				// TODO: invalidate faster than every minute when not ambient
 				Invalidate();
 			}
 
