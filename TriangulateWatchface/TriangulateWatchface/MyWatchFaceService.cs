@@ -13,9 +13,11 @@ namespace TriangulateWatchface {
 
 		public class MyWatchFaceEngine : CanvasWatchFaceService.Engine {
 			readonly CanvasWatchFaceService owner;
-			private Paint hoursPaint;
+			private Paint textPaint;
+			private Paint secondsHandPaint;
+			private Paint minutesHandPaint;
+			private Paint hoursHandPaint;
 			private Paint secondsTrianglePaint;
-			private Paint secondsTrianglePaint2;
 			private Paint minutesTrianglePaint;
 			private Paint hoursTrianglePaint;
 			private Paint dotPaint;
@@ -36,32 +38,48 @@ namespace TriangulateWatchface {
 					//.SetShowSystemUiTime(false)
 					.Build());
 
-				hoursPaint = new Paint {
+				textPaint = new Paint {
 					Color = Color.Orange,
 					TextSize = 18f
 				};
 
-				secondsTrianglePaint = new Paint {
-					Color = Color.Lime,
-					StrokeWidth = 3f
 
-				};
-				secondsTrianglePaint.SetStyle(Paint.Style.FillAndStroke);
-
-				secondsTrianglePaint2 = new Paint {
+				secondsHandPaint = new Paint {
 					Color = Color.Bisque,
 					StrokeWidth = 3f
 				};
 
+				minutesHandPaint = new Paint {
+					Color = Color.Azure,
+					StrokeWidth = 3f
+				};
+
+				hoursHandPaint = new Paint {
+					Color = Color.BlanchedAlmond,
+					StrokeWidth = 3f
+				};
+
+
+				secondsTrianglePaint = new Paint {
+					Color = Color.Green,
+					StrokeWidth = 1f,
+					Alpha = 125
+
+				};
+				secondsTrianglePaint.SetStyle(Paint.Style.FillAndStroke);
+
+
 				minutesTrianglePaint = new Paint {
-					Color = Color.AliceBlue,
-					StrokeWidth = 4f
+					Color = Color.Blue,
+					StrokeWidth = 1f,
+					Alpha = 125
 
 				};
 
 				hoursTrianglePaint = new Paint {
-					Color = Color.LimeGreen,
-					StrokeWidth = 5f
+					Color = Color.Red,
+					StrokeWidth = 1f,
+					Alpha = 125
 
 				};
 
@@ -86,9 +104,9 @@ namespace TriangulateWatchface {
 				float secondsAngle = DateTime.Now.Second;
 				if (!IsInAmbientMode)
 					secondsAngle += DateTime.Now.Millisecond * .001f;
-				secondsAngle = (secondsAngle / 60f) * MathF.PI * 2f;
-				float minutesAngle = (DateTime.Now.Minute / 60f) * MathF.PI * 2f;
-				float hoursAngle = ((DateTime.Now.Hour % 12f) / 12f) * MathF.PI * 2f;
+				secondsAngle = -(secondsAngle / 60f) * MathF.PI * 2f;
+				float minutesAngle = -(DateTime.Now.Minute / 60f) * MathF.PI * 2f;
+				float hoursAngle = -((DateTime.Now.Hour % 12f) / 12f) * MathF.PI * 2f;
 
 				float secondsLengthPercent = .8f;
 				float minutesLengthPercent = .7f;
@@ -107,19 +125,30 @@ namespace TriangulateWatchface {
 				Path path = new Path();
 				path.SetFillType(Path.FillType.EvenOdd);
 				path.MoveTo(frame.CenterX(), frame.CenterY());
-				path.LineTo(secondsX, secondsX);
-				//path.MoveTo(frame.CenterX(), frame.Top);
+				path.LineTo(secondsX, secondsY);
 				path.LineTo(minutesX, minutesY);
-				//path.AddArc(new RectF(frame.CenterX(), frame.Top, frame.Right, frame.CenterY()), 90, 180);
-				//path.ArcTo(new RectF(frame.CenterX(), top, right, frame.CenterY()), -90, 0);
 				path.Close();
 
 				canvas.DrawPath(path, secondsTrianglePaint);
 
+				path.Reset();
+				path.MoveTo(frame.CenterX(), frame.CenterY());
+				path.LineTo(minutesX, minutesX);
+				path.LineTo(hoursX, hoursY);
+				path.Close();
+				canvas.DrawPath(path, minutesTrianglePaint);
 
-				canvas.DrawLine(centerX, centerY, secondsX, secondsY, secondsTrianglePaint2);
-				canvas.DrawLine(centerX, centerY, minutesX, minutesY, minutesTrianglePaint);
-				canvas.DrawLine(centerX, centerY, hoursX, hoursY, hoursTrianglePaint);
+				path.Reset();
+				path.MoveTo(frame.CenterX(), frame.CenterY());
+				path.LineTo(hoursX, hoursY);
+				path.LineTo(secondsX, secondsY);
+				path.Close();
+				canvas.DrawPath(path, hoursTrianglePaint);
+
+
+				canvas.DrawLine(centerX, centerY, secondsX, secondsY, secondsHandPaint);
+				canvas.DrawLine(centerX, centerY, minutesX, minutesY, minutesHandPaint);
+				canvas.DrawLine(centerX, centerY, hoursX, hoursY, hoursHandPaint);
 
 				canvas.DrawCircle(centerX, centerY, 3f, dotPaint);
 
@@ -129,15 +158,15 @@ namespace TriangulateWatchface {
 					centerX - 100,
 					//(float)(frame.Top + 80), 
 					centerY,
-					hoursPaint
+					textPaint
 				);
 
 				canvas.DrawText($"sa: {secondsAngle.ToString("0.00")}, {secondsX.ToString("0.00")} {secondsY.ToString("0.00")}",
 					//(float)(frame.Left + 70),
-					0,
+					30,
 					//(float)(frame.Top + 80), 
 					centerY + 50,
-					hoursPaint
+					textPaint
 				);
 
 
