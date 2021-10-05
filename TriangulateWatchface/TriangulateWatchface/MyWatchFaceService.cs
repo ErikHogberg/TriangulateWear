@@ -3,6 +3,10 @@ using Android.Views;
 using Android.Support.Wearable.Watchface;
 using Android.Service.Wallpaper;
 using Android.Graphics;
+using Android.Text.Format;
+//using System.Timers;
+using System.Threading;
+using Java.Util.Concurrent;
 
 namespace TriangulateWatchface {
 	class MyWatchFaceService : CanvasWatchFaceService {
@@ -12,7 +16,14 @@ namespace TriangulateWatchface {
 		}
 
 		public class MyWatchFaceEngine : CanvasWatchFaceService.Engine {
+
+			static long InterActiveUpdateRateMs = TimeUnit.Seconds.ToMillis(1);
+
 			readonly CanvasWatchFaceService owner;
+
+			//public Time time;
+			Timer timerSeconds;
+
 			private Paint textPaint;
 			private Paint secondsHandPaint;
 			private Paint minutesHandPaint;
@@ -96,9 +107,26 @@ namespace TriangulateWatchface {
 					//StrokeWidth = 5f
 				};
 
+				//time = new Time();
+
+				// Start a timer for redrawing the click face (second hand)
+				// every second.
+				// How to stop the timer? It shouldn't run in ambient mode...
+				timerSeconds = new Timer(
+					new TimerCallback(state => {
+						// TODO: dont update every second when ambient
+						Invalidate();
+					}),
+					null,
+					TimeSpan.FromMilliseconds(InterActiveUpdateRateMs),
+					TimeSpan.FromMilliseconds(InterActiveUpdateRateMs)
+				);
 			}
 
 			public override void OnDraw(Canvas canvas, Rect frame) {
+
+				// TODO: ambient mode draw
+
 				canvas.DrawColor(Color.DarkGray);
 
 				float top = frame.Top - padding;
@@ -202,7 +230,7 @@ namespace TriangulateWatchface {
 			}
 
 			public override void OnTimeTick() {
-				// TODO: invalidate faster than every minute when not ambient
+				base.OnTimeTick();
 				Invalidate();
 			}
 
