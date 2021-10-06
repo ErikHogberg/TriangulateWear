@@ -1,12 +1,18 @@
 ﻿using System;
+using System.Threading;
 using Android.Views;
 using Android.Support.Wearable.Watchface;
 using Android.Service.Wallpaper;
 using Android.Graphics;
 using Android.Text.Format;
 //using System.Timers;
-using System.Threading;
 using Java.Util.Concurrent;
+
+//using Android.App;
+//using Android.Util;
+//using Android.Content;
+//using Android.OS;
+//using Android.Graphics.Drawables;
 
 namespace TriangulateWatchface {
 	class MyWatchFaceService : CanvasWatchFaceService {
@@ -52,7 +58,8 @@ namespace TriangulateWatchface {
 				textPaint = new Paint {
 					Color = Color.Orange,
 					TextSize = 18f,
-					AntiAlias = true
+					AntiAlias = true,
+					TextAlign = Paint.Align.Left
 				};
 
 
@@ -150,12 +157,23 @@ namespace TriangulateWatchface {
 
 				float handLength = top - frame.CenterX();
 
-				float secondsX = handLength * MathF.Sin(secondsAngle) * secondsLengthPercent + centerX;
-				float secondsY = handLength * MathF.Cos(secondsAngle) * secondsLengthPercent + centerY;
-				float minutesX = handLength * MathF.Sin(minutesAngle) * minutesLengthPercent + centerX;
-				float minutesY = handLength * MathF.Cos(minutesAngle) * minutesLengthPercent + centerY;
-				float hoursX = handLength * MathF.Sin(hoursAngle) * hoursLengthPercent + centerX;
-				float hoursY = handLength * MathF.Cos(hoursAngle) * hoursLengthPercent + centerY;
+				string hoursText = $"{DateTime.Now.Hour}h";
+				string minutesText = $"{DateTime.Now.Minute}m";
+				string secondsText = $"{DateTime.Now.Second}s";
+
+				Rect hoursTextRect = new Rect();
+				textPaint.GetTextBounds(hoursText, 0, hoursText.Length, hoursTextRect);
+				Rect minutesTextRect = new Rect();
+				textPaint.GetTextBounds(hoursText, 0, minutesText.Length, minutesTextRect);
+				Rect secondsTextRect = new Rect();
+				textPaint.GetTextBounds(hoursText, 0, secondsText.Length, secondsTextRect);
+
+				float secondsX = handLength * MathF.Sin(secondsAngle) * secondsLengthPercent + centerX - secondsTextRect.CenterX();
+				float secondsY = handLength * MathF.Cos(secondsAngle) * secondsLengthPercent + centerY  - secondsTextRect.CenterY();
+				float minutesX = handLength * MathF.Sin(minutesAngle) * minutesLengthPercent + centerX - minutesTextRect.CenterX();
+				float minutesY = handLength * MathF.Cos(minutesAngle) * minutesLengthPercent + centerY - minutesTextRect.CenterY();
+				float hoursX = handLength * MathF.Sin(hoursAngle) * hoursLengthPercent + centerX - hoursTextRect.CenterX();
+				float hoursY = handLength * MathF.Cos(hoursAngle) * hoursLengthPercent + centerY - hoursTextRect.CenterY();
 
 				//canvas.DrawVertices(Canvas.VertexMode.TriangleFan, 3, )
 				Path path = new Path();
@@ -209,19 +227,19 @@ namespace TriangulateWatchface {
 				// TODO: better hand texts positioning
 				// TODO: circles around hand texts
 
-				canvas.DrawText($"{DateTime.Now.Hour}h",
+				canvas.DrawText(hoursText,
 					hoursX,
 					hoursY,
 					textPaint
 				);
 
-				canvas.DrawText($"{DateTime.Now.Minute}m",
+				canvas.DrawText(minutesText,
 					minutesX,
 					minutesY,
 					textPaint
 				);
 
-				canvas.DrawText($"{DateTime.Now.Second}s",
+				canvas.DrawText(secondsText,
 					secondsX,
 					secondsY,
 					textPaint
@@ -238,6 +256,17 @@ namespace TriangulateWatchface {
 				base.OnTouchEvent(e);
 
 				Invalidate();
+			}
+
+			public override void OnVisibilityChanged(bool visible) {
+				base.OnVisibilityChanged(visible);
+
+				//if (visible) {
+				//	RegisterTimezoneReceiver();
+				//	time.Clear(Java.Util.TimeZone.Default.ID);
+				//	time.SetToNow();
+				//} else
+				//	UnregisterTimezoneReceiver();
 			}
 		}
 	}
