@@ -31,6 +31,7 @@ namespace TriangulateWatchface {
 			Timer timerSeconds;
 
 			private Paint textPaint;
+			private Paint circlePaint;
 			private Paint secondsHandPaint;
 			private Paint minutesHandPaint;
 			private Paint hoursHandPaint;
@@ -56,12 +57,18 @@ namespace TriangulateWatchface {
 					.Build());
 
 				textPaint = new Paint {
-					Color = Color.Orange,
-					TextSize = 18f,
+					Color = Color.Pink,
+					TextSize = 12f,
 					AntiAlias = true,
 					TextAlign = Paint.Align.Left
 				};
 
+				circlePaint = new Paint {
+					Color = Color.White,
+					AntiAlias = true,
+					StrokeWidth = 2
+				};
+				circlePaint.SetStyle(Paint.Style.Stroke);
 
 				secondsHandPaint = new Paint {
 					Color = Color.Bisque,
@@ -157,23 +164,36 @@ namespace TriangulateWatchface {
 
 				float handLength = top - frame.CenterX();
 
-				string hoursText = $"{DateTime.Now.Hour}h";
-				string minutesText = $"{DateTime.Now.Minute}m";
-				string secondsText = $"{DateTime.Now.Second}s";
+				//string hoursText = $"{DateTime.Now.Hour}h";
+				//string minutesText = $"{DateTime.Now.Minute}m";
+				//string secondsText = $"{DateTime.Now.Second}s";
+				string hoursText = DateTime.Now.Hour.ToString();
+				string minutesText = DateTime.Now.Minute.ToString();
+				string secondsText = DateTime.Now.Second.ToString();
 
 				Rect hoursTextRect = new Rect();
 				textPaint.GetTextBounds(hoursText, 0, hoursText.Length, hoursTextRect);
 				Rect minutesTextRect = new Rect();
-				textPaint.GetTextBounds(hoursText, 0, minutesText.Length, minutesTextRect);
+				textPaint.GetTextBounds(minutesText, 0, minutesText.Length, minutesTextRect);
 				Rect secondsTextRect = new Rect();
-				textPaint.GetTextBounds(hoursText, 0, secondsText.Length, secondsTextRect);
+				textPaint.GetTextBounds(secondsText, 0, secondsText.Length, secondsTextRect);
 
-				float secondsX = handLength * MathF.Sin(secondsAngle) * secondsLengthPercent + centerX - secondsTextRect.CenterX();
-				float secondsY = handLength * MathF.Cos(secondsAngle) * secondsLengthPercent + centerY  - secondsTextRect.CenterY();
-				float minutesX = handLength * MathF.Sin(minutesAngle) * minutesLengthPercent + centerX - minutesTextRect.CenterX();
-				float minutesY = handLength * MathF.Cos(minutesAngle) * minutesLengthPercent + centerY - minutesTextRect.CenterY();
-				float hoursX = handLength * MathF.Sin(hoursAngle) * hoursLengthPercent + centerX - hoursTextRect.CenterX();
-				float hoursY = handLength * MathF.Cos(hoursAngle) * hoursLengthPercent + centerY - hoursTextRect.CenterY();
+				float circleRadius = 10f;
+
+				float secondsX = handLength * MathF.Sin(secondsAngle) * secondsLengthPercent + centerX;
+				float secondsY = handLength * MathF.Cos(secondsAngle) * secondsLengthPercent + centerY;
+				float minutesX = handLength * MathF.Sin(minutesAngle) * minutesLengthPercent + centerX;
+				float minutesY = handLength * MathF.Cos(minutesAngle) * minutesLengthPercent + centerY;
+				float hoursX = handLength * MathF.Sin(hoursAngle) * hoursLengthPercent + centerX;
+				float hoursY = handLength * MathF.Cos(hoursAngle) * hoursLengthPercent + centerY;
+
+				float secondsCircleX = MathF.Sin(secondsAngle) * (handLength * secondsLengthPercent - circleRadius) + centerX;
+				float secondsCircleY = MathF.Cos(secondsAngle) * (handLength * secondsLengthPercent - circleRadius) + centerY;
+				float minutesCircleX = MathF.Sin(minutesAngle) * (handLength * minutesLengthPercent - circleRadius) + centerX;
+				float minutesCircleY = MathF.Cos(minutesAngle) * (handLength * minutesLengthPercent - circleRadius) + centerY;
+				float hoursCircleX = MathF.Sin(hoursAngle) * (handLength * hoursLengthPercent - circleRadius) + centerX;
+				float hoursCircleY = MathF.Cos(hoursAngle) * (handLength * hoursLengthPercent - circleRadius) + centerY;
+
 
 				//canvas.DrawVertices(Canvas.VertexMode.TriangleFan, 3, )
 				Path path = new Path();
@@ -187,7 +207,7 @@ namespace TriangulateWatchface {
 
 				path.Reset();
 				path.MoveTo(frame.CenterX(), frame.CenterY());
-				path.LineTo(minutesX, minutesX);
+				path.LineTo(minutesX, minutesY);
 				path.LineTo(hoursX, hoursY);
 				path.Close();
 				canvas.DrawPath(path, minutesTrianglePaint);
@@ -228,22 +248,26 @@ namespace TriangulateWatchface {
 				// TODO: circles around hand texts
 
 				canvas.DrawText(hoursText,
-					hoursX,
-					hoursY,
+					hoursCircleX - hoursTextRect.CenterX(),
+					hoursCircleY - hoursTextRect.CenterY(),
 					textPaint
 				);
 
 				canvas.DrawText(minutesText,
-					minutesX,
-					minutesY,
+					minutesCircleX - minutesTextRect.CenterX(),
+					minutesCircleY - minutesTextRect.CenterY(),
 					textPaint
 				);
 
 				canvas.DrawText(secondsText,
-					secondsX,
-					secondsY,
+					secondsCircleX - secondsTextRect.CenterX(),
+					secondsCircleY - secondsTextRect.CenterY(),
 					textPaint
 				);
+
+				canvas.DrawCircle(secondsCircleX, secondsCircleY, circleRadius, circlePaint);
+				canvas.DrawCircle(minutesCircleX, minutesCircleY, circleRadius, circlePaint);
+				canvas.DrawCircle(hoursCircleX, hoursCircleY, circleRadius, circlePaint);
 
 			}
 
